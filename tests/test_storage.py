@@ -58,3 +58,15 @@ def test_profiles_file_is_valid_json(isolated_store):
     profiles_file = isolated_store / storage.PROFILES_FILE
     data = json.loads(profiles_file.read_text())
     assert "test" in data
+
+
+def test_set_profile_overwrites_existing():
+    """Setting a profile that already exists should replace its variables."""
+    storage.set_profile("dev", {"DEBUG": "true", "PORT": "8000"})
+    storage.set_profile("dev", {"DEBUG": "false"})
+    assert storage.get_profile("dev") == {"DEBUG": "false"}
+
+
+def test_list_profile_names_empty():
+    """list_profile_names should return an empty list when no profiles exist."""
+    assert storage.list_profile_names() == []
