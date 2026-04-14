@@ -67,3 +67,21 @@ def validate_profile_name(name: str) -> None:
             f"Invalid profile name '{name}'. "
             "Use only letters, digits, hyphens, underscores, and dots (max 64 chars)."
         )
+
+
+def validate_var_values(variables: Dict[str, str]) -> None:
+    """Validate that all variable values are strings.
+
+    Raises ValidationError if any value is not a string instance.  This
+    guards against callers accidentally passing numeric or ``None`` values
+    that would cause unexpected behaviour when the variables are exported
+    to the shell environment.
+    """
+    non_string_keys: List[str] = [
+        key for key, value in variables.items() if not isinstance(value, str)
+    ]
+    if non_string_keys:
+        raise ValidationError(
+            f"Variable value(s) must be strings: {', '.join(sorted(non_string_keys))}",
+            invalid_keys=non_string_keys,
+        )
