@@ -14,7 +14,19 @@ from envctl.cli_watch import cmd_watch
 
 
 def register_watch(cli: click.Group) -> None:
-    """Attach the *watch* command group to *cli*."""
+    """Attach the *watch* command group to *cli*.
+
+    Parameters
+    ----------
+    cli:
+        The root :class:`click.Group` instance to which the ``watch``
+        sub-command group will be added.  Raises :exc:`TypeError` if
+        *cli* is not a :class:`click.Group`.
+    """
+    if not isinstance(cli, click.Group):
+        raise TypeError(
+            f"register_watch() expects a click.Group, got {type(cli).__name__!r}"
+        )
     cli.add_command(cmd_watch)
 
 
