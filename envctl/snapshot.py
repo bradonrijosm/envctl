@@ -77,3 +77,20 @@ def list_snapshots() -> List[dict]:
     """Return all snapshots sorted newest-first."""
     snapshots = _load_snapshots()
     return sorted(snapshots.values(), key=lambda s: s["created_at"], reverse=True)
+
+
+def rename_snapshot(old_name: str, new_name: str) -> None:
+    """Rename an existing snapshot from *old_name* to *new_name*.
+
+    Raises SnapshotError if *old_name* does not exist or *new_name* is
+    already taken.
+    """
+    snapshots = _load_snapshots()
+    if old_name not in snapshots:
+        raise SnapshotError(f"Snapshot '{old_name}' not found.")
+    if new_name in snapshots:
+        raise SnapshotError(f"Snapshot '{new_name}' already exists.")
+    entry = snapshots.pop(old_name)
+    entry["name"] = new_name
+    snapshots[new_name] = entry
+    _save_snapshots(snapshots)
