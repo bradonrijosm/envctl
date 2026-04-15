@@ -38,6 +38,13 @@ def test_record_event_with_detail():
     assert log[0]["detail"] == "merged from prod"
 
 
+def test_record_event_without_detail_omits_key():
+    """Entries recorded without a detail should not include the detail key."""
+    record_event("create", "dev")
+    log = get_audit_log()
+    assert "detail" not in log[0]
+
+
 def test_get_audit_log_newest_first():
     record_event("create", "alpha")
     record_event("update", "beta")
@@ -62,6 +69,16 @@ def test_get_audit_log_respects_limit():
         record_event("create", f"profile-{i}")
     log = get_audit_log(limit=3)
     assert len(log) == 3
+
+
+def test_get_audit_log_limit_and_filter_combined():
+    """limit should apply after profile filtering, not before."""
+    for i in range(5):
+        record_event("create", "dev")
+        record_event("create", "prod")
+    log = get_audit_log(profile="dev", limit=3)
+    assert len(log) == 3
+    assert all(e["profile"] == "dev" for e in log)
 
 
 def test_clear_audit_log_returns_count():
