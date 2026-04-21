@@ -18,7 +18,8 @@ def cmd_sort() -> None:
     help="Field to sort by.",
 )
 @click.option("--reverse", is_flag=True, default=False, help="Sort in descending order.")
-def sort_run(profile: str, by: str, reverse: bool) -> None:
+@click.option("--quiet", is_flag=True, default=False, help="Suppress output of sorted variables.")
+def sort_run(profile: str, by: str, reverse: bool, quiet: bool) -> None:
     """Sort variables in PROFILE and persist the result."""
     try:
         sorted_vars = sort_profile(profile, by=by, reverse=reverse)  # type: ignore[arg-type]
@@ -26,6 +27,7 @@ def sort_run(profile: str, by: str, reverse: bool) -> None:
         raise click.ClickException(str(exc)) from exc
 
     direction = "descending" if reverse else "ascending"
-    click.echo(f"Sorted '{profile}' by {by} ({direction}):")
-    for k, v in sorted_vars.items():
-        click.echo(f"  {k}={v}")
+    click.echo(f"Sorted '{profile}' by {by} ({direction}): {len(sorted_vars)} variable(s).")
+    if not quiet:
+        for k, v in sorted_vars.items():
+            click.echo(f"  {k}={v}")
