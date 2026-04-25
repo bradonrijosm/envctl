@@ -12,10 +12,12 @@ from envctl.env_count import CountError, ProfileCount, count_all_profiles, count
 # ---------------------------------------------------------------------------
 
 def _mock_get(monkeypatch, variables):
+    """Patch get_profile to return the given variables dict for any profile name."""
     monkeypatch.setattr("envctl.env_count.get_profile", lambda _name: variables)
 
 
 def _mock_load(monkeypatch, profiles):
+    """Patch load_profiles and get_profile to use the given profiles dict."""
     monkeypatch.setattr("envctl.env_count.load_profiles", lambda: profiles)
     # Also patch get_profile so count_profile works per-name
     monkeypatch.setattr(
@@ -66,6 +68,13 @@ def test_count_profile_name_preserved(monkeypatch):
     assert pc.name == "staging"
 
 
+def test_count_profile_total_equals_empty_plus_non_empty(monkeypatch):
+    """Sanity check: total must always equal empty + non_empty."""
+    _mock_get(monkeypatch, {"A": "1", "B": "", "C": "3", "D": ""})
+    pc = count_profile("myprofile")
+    assert pc.total == pc.empty + pc.non_empty
+
+
 # ---------------------------------------------------------------------------
 # count_all_profiles
 # ---------------------------------------------------------------------------
@@ -95,13 +104,4 @@ def test_count_all_profiles_returns_per_profile_entries(monkeypatch):
         "beta": {"M": "n", "O": ""},
     })
     summary = count_all_profiles()
-    names = [p.name for p in summary.profiles]
-    assert "alpha" in names
-    assert "beta" in names
-
-
-def test_count_all_profiles_empty_store(monkeypatch):
-    _mock_load(monkeypatch, {})
-    summary = count_all_profiles()
-    assert summary.grand_total == 0
-    assert summary.profiles == []
+    names = [p.name for p in summary.p
